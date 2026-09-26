@@ -1,4 +1,4 @@
-# Flappy Grey — v0.6
+# Flappy Grey — v0.6.2
 
 A flap-and-dodge browser arcade game starring an **African Grey parrot**: grey scalloped plumage, pale face, black hooked beak and a bright red tail.
 
@@ -129,6 +129,13 @@ assets/audio/       reserved for production audio
 - All paths are relative, and there are no external dependencies or CDN calls.
 
 ## Version history
+### v0.6.2
+- Route cards now show a simpler, smaller line: `TOP SCORE : 42  JACK`.
+- A save that Firebase refuses now shows a clear message instead of "record changed".
+
+### v0.6.1
+Connected the route records to the `flappy-grey` Firebase project, so records are now shared by all players.
+
 ### v0.6
 - Added route records. Beating a route's record prompts for a 4-letter name, and each menu card shows the route's top score and its holder.
 - Records are shared through Firebase Firestore when it's configured, and stay on the device otherwise.

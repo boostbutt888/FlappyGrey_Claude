@@ -93,9 +93,12 @@
         cache[routeId] = { name, score };
         return { ok: true };
       }
-      // Rejected by the rules: most likely someone else set a higher score meanwhile
+      // Rejected: either someone set a higher score meanwhile, or the rules/database aren't set up
       await refresh();
-      return { ok: false, reason: 'beaten', record: cache[routeId] || null };
+      const cur = cache[routeId] || null;
+      if (cur && cur.score >= score) return { ok: false, reason: 'beaten', record: cur };
+      if (typeof console !== 'undefined') console.warn('Flappy Grey: record save rejected', res.status);
+      return { ok: false, reason: 'denied', status: res.status };
     } catch (e) {
       return { ok: false, reason: 'network' };
     }
