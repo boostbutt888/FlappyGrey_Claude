@@ -77,8 +77,39 @@
         this.amb.connect(this.master);
         this.noise = this._makeNoise();
       }
-      if (this.ctx.state === 'suspended') this.ctx.resume();
+      // iOS Safari: route Web Audio as media playback so the ringer/silent switch doesn't mute it
+      try {
+        if (navigator.audioSession && navigator.audioSession.type !== 'playback') navigator.audioSession.type = 'playback';
+      } catch (e) {}
+      // iOS can report 'suspended' or 'interrupted'; resume from any non-running state
+      if (this.ctx.state !== 'running') this.ctx.resume().catch(() => {});
+      // iOS unlock: play a one-sample silent buffer inside the user gesture
+      if (!this._primed) {
+        this._primed = true;
+        try {
+          const b = this.ctx.createBuffer(1, 1, 22050);
+          const src = this.ctx.createBufferSource();
+          src.buffer = b;
+          src.connect(this.ctx.destination);
+          src.start(0);
+        } catch (e) {}
+        this._silentTag();
+      }
       if (this.wantMusic && !this.musicTimer) this._startMusic();
+    }
+
+    /** Older iOS (pre-16.4) fallback: a looping silent <audio> element keeps Web Audio on the media channel. */
+    _silentTag() {
+      if (navigator.audioSession) return;
+      try {
+        const a = document.createElement('audio');
+        a.setAttribute('playsinline', '');
+        a.loop = true;
+        a.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAABErAAABAAgAZGF0YQAAAAA=';
+        const p = a.play();
+        if (p && p.catch) p.catch(() => {});
+        this._silentEl = a;
+      } catch (e) {}
     }
 
     get ready() {
@@ -89,7 +120,7 @@
       if (this.ctx && this.ctx.state === 'running') this.ctx.suspend();
     }
     resume() {
-      if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+      if (this.ctx && this.ctx.state !== 'running') this.ctx.resume().catch(() => {});
     }
 
     setMuted(m) {

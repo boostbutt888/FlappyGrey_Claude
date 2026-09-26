@@ -403,7 +403,7 @@
   });
 
   // Unlock audio / start menu theme on first interaction anywhere
-  ['pointerdown', 'touchstart', 'keydown'].forEach((ev) => window.addEventListener(ev, () => audio.unlock(), { passive: true }));
+  ['pointerdown', 'touchstart', 'touchend', 'click', 'keydown'].forEach((ev) => window.addEventListener(ev, () => audio.unlock(), { passive: true }));
 
   document.querySelectorAll('.sound-toggle').forEach((b) => b.addEventListener('click', toggleMute));
   $('btn-pause').addEventListener('click', togglePause);

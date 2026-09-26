@@ -1,4 +1,4 @@
-# Flappy Grey — v0.5
+# Flappy Grey — v0.5.1
 
 A flap-and-dodge browser arcade game starring an **African Grey parrot**: grey scalloped plumage, pale face, black hooked beak and a bright red tail.
 
@@ -87,6 +87,9 @@ assets/audio/       reserved for production audio
 - All paths are relative, and there are no external dependencies or CDN calls.
 
 ## Version history
+### v0.5.1
+Fix: no sound in iPhone Safari. Web Audio is now routed as media playback, so the silent switch no longer mutes it. Unlocking also handles iOS's 'interrupted' audio state and listens for tap-end and click events.
+
 ### v0.5 — current
 Rebuilt from the v0.4 product context:
 - New African Grey rendering: scalloped feathers, bare pale face patch, pale iris, hooked black beak, fanned scarlet tail and a far wing behind the body. The wing animates through a down-stroke on each flap and rises into a parachute glide when falling.
