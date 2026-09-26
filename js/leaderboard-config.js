@@ -8,6 +8,6 @@
  */
 window.FG = window.FG || {};
 window.FG.LEADERBOARD_CONFIG = {
-  projectId: '',
-  apiKey: '',
+  projectId: 'flappy-grey',
+  apiKey: 'AIzaSyAgac582vh23V9szjx3tov_VTHcHiLIDDc',
 };

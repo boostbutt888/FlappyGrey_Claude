@@ -41,7 +41,6 @@
     recordMsg: $('record-msg'),
   };
   const LB = FG.Leaderboard;
-  const CROWN = '<svg class="crown" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7l4.5 4L12 4l4.5 7L21 7l-2 12H5z"/></svg>';
 
   const best = Object.assign({ jungle: 0, savanna: 0, storm: 0 }, storage.get('flappygrey.best', {}));
 
@@ -139,7 +138,7 @@
             <span class="diff">${r.difficulty}<span class="pips">${pips}</span></span>
             <span class="route-best">Best <b data-best="${id}">${best[id]}</b></span>
           </span>
-          <span class="route-record" data-rec="${id}">${CROWN}<span class="rec-label">Record</span><b></b><i></i></span>
+          <span class="route-record" data-rec="${id}">Top score : <b>—</b><i></i></span>
         </span>`;
       const cv = card.querySelector('canvas');
       FG.Scenery.renderPreview(id, cv, (c) => {
@@ -161,9 +160,8 @@
     document.querySelectorAll('[data-rec]').forEach((el) => {
       const rec = LB.get(el.dataset.rec);
       const offline = LB.status === 'offline';
-      el.querySelector('.rec-label').textContent = offline ? 'Offline' : 'Record';
-      el.querySelector('b').textContent = rec ? rec.score : '';
-      el.querySelector('i').textContent = rec ? rec.name : offline || LB.status === 'loading' ? '' : 'Open';
+      el.querySelector('b').textContent = rec ? rec.score : offline ? 'offline' : '—';
+      el.querySelector('i').textContent = rec ? rec.name : '';
     });
   }
 
@@ -368,6 +366,11 @@
       ui.recordMsg.textContent = `${name} now holds the ${route.name} record with ${score}!`;
       ui.goRec.textContent = recordText({ name, score });
       audio.score();
+    } else if (res.reason === 'denied') {
+      ui.recordName.disabled = false;
+      ui.recordSave.disabled = false;
+      ui.recordMsg.classList.add('warn');
+      ui.recordMsg.textContent = 'The record board refused the save. (Firestore rules not published?)';
     } else if (res.reason === 'beaten') {
       ui.recordForm.classList.add('hidden');
       ui.recordMsg.classList.add('warn');

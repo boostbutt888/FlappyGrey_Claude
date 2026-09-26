@@ -418,22 +418,17 @@ kbd {
 
 /* Route records */
 .route-record {
-  display: flex;
-  white-space: nowrap;
-  min-width: 0;
-  overflow: hidden;
-  align-items: baseline;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 600;
   color: var(--ink-dim);
   text-transform: uppercase;
   letter-spacing: 0.06em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.route-record .crown { width: 14px; height: 14px; fill: var(--gold); align-self: center; flex: none; }
-.route-record b { color: var(--gold); font: 900 15px / 1 var(--font-display); letter-spacing: 0; }
-.route-record .rec-label { margin-right: auto; overflow: hidden; text-overflow: ellipsis; }
-.route-record i { font-style: normal; color: var(--ink); letter-spacing: 0.14em; }
+.route-record b { color: var(--ink); font-weight: 800; }
+.route-record i { font-style: normal; font-weight: 800; color: var(--ink); margin-left: 12px; letter-spacing: 0.12em; }
 .go-rec strong { color: var(--gold); font-size: 22px; }
 .record {
   margin: 0 0 16px;

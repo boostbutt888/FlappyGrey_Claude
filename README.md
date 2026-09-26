@@ -1,4 +1,4 @@
-# Flappy Grey — v0.6.2
+# Flappy Grey — v0.6.3
 
 A flap-and-dodge browser arcade game starring an **African Grey parrot**: grey scalloped plumage, pale face, black hooked beak and a bright red tail.
 
@@ -129,6 +129,12 @@ assets/audio/       reserved for production audio
 - All paths are relative, and there are no external dependencies or CDN calls.
 
 ## Version history
+### v0.6.3
+- Records now update live across devices. The shared board is re-checked every 15 seconds on the menu and game-over screens, and straight away when you return to the app.
+- When someone sets a new record, its line on the route card flashes gold.
+- The end-of-run check confirms against the live board, so if a record was beaten mid-run the player sees who beat it.
+- Fix: the Firebase keys were missing from the live build.
+
 ### v0.6.2
 - Route cards now show a simpler, smaller line: `TOP SCORE : 42  JACK`.
 - A save that Firebase refuses now shows a clear message instead of "record changed".
