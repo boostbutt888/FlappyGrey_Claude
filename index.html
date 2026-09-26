@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1a22" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>Flappy Grey</title>
+  <link rel="stylesheet" href="css/game.css" />
+</head>
+<body>
+  <div id="app">
+    <canvas id="game" aria-label="Flappy Grey game"></canvas>
+
+    <!-- In-game HUD -->
+    <div id="hud" class="hidden">
+      <div class="hud-left"><span id="hud-route" class="route-chip">Jungle Dash</span></div>
+      <div id="hud-score" class="hud-score">0</div>
+      <div class="hud-right">
+        <button id="btn-pause" class="icon-btn" aria-label="Pause (P)" title="Pause (P)">
+          <svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+        </button>
+        <button class="icon-btn sound-toggle" aria-label="Toggle sound (M)" title="Sound (M)"></button>
+      </div>
+    </div>
+
+    <div id="countdown" class="countdown hidden" aria-live="assertive"></div>
+    <div id="hint" class="play-hint hidden">Tap · Click · Space to flap</div>
+
+    <!-- Start / route selection -->
+    <section id="menu" class="screen">
+      <button class="icon-btn sound-toggle corner" aria-label="Toggle sound (M)" title="Sound (M)"></button>
+      <div class="menu-inner">
+        <header class="hero">
+          <canvas id="hero-bird" width="300" height="220" aria-hidden="true"></canvas>
+          <h1 class="title"><span class="t-flappy">FLAPPY</span><span class="t-grey">GREY</span></h1>
+          <p class="subtitle">One African Grey. Three wild worlds.</p>
+        </header>
+        <div id="routes" class="routes" role="list"></div>
+        <p class="controls">
+          <span><kbd>Space</kbd> / click / tap to flap</span>
+          <span><kbd>P</kbd> pause</span>
+          <span><kbd>M</kbd> sound</span>
+          <span><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> quick start</span>
+        </p>
+        <p class="version">v<span id="ver"></span></p>
+      </div>
+    </section>
+
+    <!-- Pause -->
+    <section id="pause" class="screen dim hidden">
+      <div class="panel">
+        <h2>Paused</h2>
+        <div class="btn-row">
+          <button id="btn-resume" class="btn primary">Resume</button>
+          <button id="btn-pause-routes" class="btn">Routes</button>
+        </div>
+        <p class="panel-hint"><kbd>P</kbd> / <kbd>Esc</kbd> to resume</p>
+      </div>
+    </section>
+
+    <!-- Game over -->
+    <section id="gameover" class="screen dim hidden">
+      <div class="panel">
+        <h2 class="go-title">Game Over</h2>
+        <p id="go-route" class="go-route"></p>
+        <div class="go-body">
+          <div id="go-medal" class="medal none"><span>—</span></div>
+          <div class="go-scores">
+            <div class="go-row"><span>Score</span><strong id="go-score">0</strong></div>
+            <div class="go-row"><span>Best</span><strong id="go-best">0</strong></div>
+            <div id="go-new" class="new-best hidden">New best!</div>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button id="btn-retry" class="btn primary">Retry</button>
+          <button id="btn-routes" class="btn">Routes</button>
+        </div>
+        <p class="panel-hint"><kbd>Space</kbd> retry · <kbd>Esc</kbd> routes</p>
+      </div>
+    </section>
+  </div>
+
+  <script src="js/util.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/bird.js"></script>
+  <script src="js/scenery.js"></script>
+  <script src="js/obstacles.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
