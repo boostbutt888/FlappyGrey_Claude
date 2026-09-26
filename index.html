@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b1a22" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <title>Flappy Grey</title>
-  <link rel="stylesheet" href="css/game.css" />
+  <link rel="stylesheet" href="css/game.css?v=0.6" />
 </head>
 <body>
   <div id="app">
@@ -69,9 +69,19 @@
           <div class="go-scores">
             <div class="go-row"><span>Score</span><strong id="go-score">0</strong></div>
             <div class="go-row"><span>Best</span><strong id="go-best">0</strong></div>
+            <div class="go-row go-rec"><span id="go-rec-label">Record</span><strong id="go-rec">—</strong></div>
             <div id="go-new" class="new-best hidden">New best!</div>
           </div>
         </div>
+        <form id="record-form" class="record hidden" autocomplete="off" novalidate>
+          <div class="record-title">New route record!</div>
+          <label for="record-name" class="record-label">Enter your name (4 letters)</label>
+          <div class="record-entry">
+            <input id="record-name" type="text" maxlength="4" inputmode="text" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="AAAA" aria-label="Your 4-letter name" />
+            <button id="record-save" type="submit" class="btn primary" disabled>Save</button>
+          </div>
+        </form>
+        <p id="record-msg" class="record-msg hidden" aria-live="polite"></p>
         <div class="btn-row">
           <button id="btn-retry" class="btn primary">Retry</button>
           <button id="btn-routes" class="btn">Routes</button>
@@ -81,12 +91,14 @@
     </section>
   </div>
 
-  <script src="js/util.js"></script>
-  <script src="js/config.js"></script>
-  <script src="js/audio.js"></script>
-  <script src="js/bird.js"></script>
-  <script src="js/scenery.js"></script>
-  <script src="js/obstacles.js"></script>
-  <script src="js/game.js"></script>
+  <script src="js/util.js?v=0.6"></script>
+  <script src="js/config.js?v=0.6"></script>
+  <script src="js/leaderboard-config.js?v=0.6"></script>
+  <script src="js/audio.js?v=0.6"></script>
+  <script src="js/bird.js?v=0.6"></script>
+  <script src="js/scenery.js?v=0.6"></script>
+  <script src="js/obstacles.js?v=0.6"></script>
+  <script src="js/leaderboard.js?v=0.6"></script>
+  <script src="js/game.js?v=0.6"></script>
 </body>
 </html>
