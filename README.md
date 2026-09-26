@@ -1,4 +1,4 @@
-# Flappy Grey — v0.5.1
+# Flappy Grey — v0.6
 
 A flap-and-dodge browser arcade game starring an **African Grey parrot**: grey scalloped plumage, pale face, black hooked beak and a bright red tail.
 
@@ -53,6 +53,46 @@ Effects drawn every frame on top of the planes:
 - Storm Flight: 3-depth rain with splashes, and lightning bolts with a screen flash
 - All routes: a cinematic vignette
 
+## Route records (4-letter names)
+Each route has one record: the top score and the 4-letter name of whoever set it.
+- The record for each route shows on its menu card and on the game-over screen.
+- When a run beats the route record, the game-over screen asks for a 4-letter name (A–Z). The name you used last time is filled in for you.
+- Without a Firebase setup, records are kept on each device only and labelled **Device record**.
+- With Firebase set up, one shared record per route is visible to every player and labelled **World record**.
+
+### Online records: one-time Firebase setup (free Spark plan, about 10 minutes)
+1. Go to https://console.firebase.google.com and click **Create a project**, for example `flappy-grey`. Google Analytics isn't needed.
+2. In the left menu, open **Build → Firestore Database** and click **Create database**. Choose a location near your players (e.g. `asia-southeast1` for Singapore) and start in **production mode**.
+3. Open the **Rules** tab, replace everything with the rules below, then click **Publish**.
+4. Click the gear icon next to Project Overview and open **Project settings**. Copy the **Project ID**.
+5. Under **Your apps**, click the web icon `</>` and register an app with any nickname. You don't need Hosting. Copy the **apiKey** value.
+6. Paste both values into `js/leaderboard-config.js`, then push to GitHub.
+
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /leaderboard/{route} {
+      allow read: if true;
+      allow create, update: if route in ['jungle', 'savanna', 'storm']
+        && request.resource.data.keys().hasOnly(['name', 'score'])
+        && request.resource.data.name is string
+        && request.resource.data.name.matches('^[A-Z]{4}$')
+        && request.resource.data.score is int
+        && request.resource.data.score > 0
+        && request.resource.data.score <= 9999
+        && (resource == null || request.resource.data.score > resource.data.score);
+      allow delete: if false;
+    }
+  }
+}
+```
+These rules only allow a write that beats the current record, and only with a valid 4-letter name and a score from 1 to 9999.
+
+The apiKey is a public identifier, not a password, so it's normal for it to be visible in the code.
+
+Because scores are calculated in the player's browser, a determined player could still send a fake score. To reset a record, delete its document in the Firebase console under Firestore Database → leaderboard.
+
 ## Audio
 All audio is synthesized in code, so there are no files and no copyrighted material.
 - Sound effects: flap, score, hit and fall, ground thud, countdown beeps, new-best fanfare.
@@ -68,6 +108,8 @@ All audio is synthesized in code, so there are no files and no copyrighted mater
 index.html
 css/game.css        UI: menu, HUD, countdown, pause, game over
 js/util.js          seeded RNG, seamless ridge noise, colour and storage helpers
+js/leaderboard-config.js  Firebase Project ID + apiKey (blank = device-only records)
+js/leaderboard.js   route records: fetch, check, submit (Firestore REST)
 js/config.js        world size, physics, route tuning, medals
 js/audio.js         Web Audio engine: SFX, menu theme, ambience
 js/bird.js          African Grey drawing and wing animation
@@ -87,6 +129,11 @@ assets/audio/       reserved for production audio
 - All paths are relative, and there are no external dependencies or CDN calls.
 
 ## Version history
+### v0.6
+- Added route records. Beating a route's record prompts for a 4-letter name, and each menu card shows the route's top score and its holder.
+- Records are shared through Firebase Firestore when it's configured, and stay on the device otherwise.
+- Script and style links now carry `?v=` version stamps, so browsers load the new files straight after an update.
+
 ### v0.5.1
 Fix: no sound in iPhone Safari. Web Audio is now routed as media playback, so the silent switch no longer mutes it. Unlocking also handles iOS's 'interrupted' audio state and listens for tap-end and click events.
 

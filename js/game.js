@@ -33,7 +33,15 @@
     goMedal: $('go-medal'),
     retry: $('btn-retry'),
     heroBird: $('hero-bird'),
+    goRec: $('go-rec'),
+    goRecLabel: $('go-rec-label'),
+    recordForm: $('record-form'),
+    recordName: $('record-name'),
+    recordSave: $('record-save'),
+    recordMsg: $('record-msg'),
   };
+  const LB = FG.Leaderboard;
+  const CROWN = '<svg class="crown" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7l4.5 4L12 4l4.5 7L21 7l-2 12H5z"/></svg>';
 
   const best = Object.assign({ jungle: 0, savanna: 0, storm: 0 }, storage.get('flappygrey.best', {}));
 
@@ -131,6 +139,7 @@
             <span class="diff">${r.difficulty}<span class="pips">${pips}</span></span>
             <span class="route-best">Best <b data-best="${id}">${best[id]}</b></span>
           </span>
+          <span class="route-record" data-rec="${id}">${CROWN}<span class="rec-label">Record</span><b></b><i></i></span>
         </span>`;
       const cv = card.querySelector('canvas');
       FG.Scenery.renderPreview(id, cv, (c) => {
@@ -141,6 +150,20 @@
       card.addEventListener('mouseenter', () => previewRoute(id));
       card.addEventListener('focus', () => previewRoute(id));
       ui.routes.appendChild(card);
+    });
+  }
+
+  function recordText(rec) {
+    return rec ? `${rec.score} · ${rec.name}` : '—';
+  }
+
+  function refreshRecordLabels() {
+    document.querySelectorAll('[data-rec]').forEach((el) => {
+      const rec = LB.get(el.dataset.rec);
+      const offline = LB.status === 'offline';
+      el.querySelector('.rec-label').textContent = offline ? 'Offline' : 'Record';
+      el.querySelector('b').textContent = rec ? rec.score : '';
+      el.querySelector('i').textContent = rec ? rec.name : offline || LB.status === 'loading' ? '' : 'Open';
     });
   }
 
@@ -167,6 +190,8 @@
     ui.over.classList.add('hidden');
     ui.menu.classList.remove('hidden');
     refreshBestLabels();
+    refreshRecordLabels();
+    LB.refresh().then(refreshRecordLabels);
     previewRoute(state.route.id);
     audio.stopAmbience();
     audio.playMenuMusic();
@@ -208,7 +233,9 @@
     state.flash = 0;
     ui.over.classList.add('hidden');
     ui.pause.classList.add('hidden');
+    ui.recordName.blur();
     ui.hud.classList.remove('hidden');
+    LB.refresh(); // keep the route record fresh so the end-of-run check is accurate
     ui.hint.classList.remove('hidden');
     startCountdown(false);
   }
@@ -292,12 +319,69 @@
     const medal = FG.MEDALS.find((m) => state.score >= m.min);
     ui.goMedal.className = 'medal ' + (medal ? medal.cls : 'none');
     ui.goMedal.innerHTML = `<span>${medal ? medal.name : '—'}</span>`;
+    // Route record (top score + 4-letter name)
+    const rec = LB.get(id);
+    ui.goRecLabel.textContent = LB.status === 'offline' ? 'Record (offline)' : LB.label().replace(' record', '');
+    ui.goRec.textContent = recordText(rec);
+    ui.recordMsg.classList.add('hidden');
+    ui.recordMsg.classList.remove('warn');
+    const canClaim = LB.qualifies(id, state.score);
+    ui.recordForm.classList.toggle('hidden', !canClaim);
+    ui.recordName.value = canClaim ? LB.lastName() : '';
+    ui.recordName.disabled = false;
+    ui.recordSave.disabled = ui.recordName.value.length !== 4;
     ui.over.classList.remove('hidden');
+    if (canClaim) {
+      audio.newBest();
+      setTimeout(() => {
+        try { ui.recordName.focus({ preventScroll: true }); ui.recordName.select(); } catch (e) {}
+      }, 380);
+    }
     ui.retry.disabled = true;
     state.overReadyAt = performance.now() + 450;
     setTimeout(() => (ui.retry.disabled = false), 450);
-    if (isNew) setTimeout(() => audio.newBest(), 250);
+    if (isNew && !canClaim) setTimeout(() => audio.newBest(), 250);
   }
+
+  ui.recordName.addEventListener('input', () => {
+    const v = LB.cleanName(ui.recordName.value);
+    if (v !== ui.recordName.value) ui.recordName.value = v;
+    ui.recordSave.disabled = v.length !== 4;
+  });
+
+  ui.recordForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = LB.cleanName(ui.recordName.value);
+    if (name.length !== 4) return;
+    const route = state.route;
+    const score = state.score;
+    ui.recordSave.disabled = true;
+    ui.recordName.disabled = true;
+    ui.recordSave.textContent = 'Saving…';
+    const res = await LB.submit(route.id, name, score);
+    ui.recordSave.textContent = 'Save';
+    ui.recordName.blur();
+    ui.recordMsg.classList.remove('hidden');
+    if (res.ok) {
+      ui.recordForm.classList.add('hidden');
+      ui.recordMsg.classList.remove('warn');
+      ui.recordMsg.textContent = `${name} now holds the ${route.name} record with ${score}!`;
+      ui.goRec.textContent = recordText({ name, score });
+      audio.score();
+    } else if (res.reason === 'beaten') {
+      ui.recordForm.classList.add('hidden');
+      ui.recordMsg.classList.add('warn');
+      ui.recordMsg.textContent = res.record
+        ? `So close — ${res.record.name} just set ${res.record.score}.`
+        : 'The record changed before yours was saved.';
+      ui.goRec.textContent = recordText(res.record);
+    } else {
+      ui.recordName.disabled = false;
+      ui.recordSave.disabled = false;
+      ui.recordMsg.classList.add('warn');
+      ui.recordMsg.textContent = 'Couldn’t reach the record board. Check your connection and tap Save again.';
+    }
+  });
 
   function retry() {
     if (state.mode !== 'over' || performance.now() < state.overReadyAt) return;
@@ -348,6 +432,11 @@
   // ------------------------------------------------------------------
   window.addEventListener('keydown', (e) => {
     audio.unlock();
+    // Typing a name: let the input have the keys (Enter submits the form natively)
+    if (e.target && e.target.tagName === 'INPUT') {
+      if (e.code === 'Escape') e.target.blur();
+      return;
+    }
     const m = state.mode;
     switch (e.code) {
       case 'Space':

@@ -3,7 +3,7 @@
   'use strict';
   const FG = (window.FG = window.FG || {});
 
-  FG.VERSION = '0.5.1';
+  FG.VERSION = '0.6';
 
   FG.WORLD = {
     H: 720, // logical height; width adapts to screen aspect
